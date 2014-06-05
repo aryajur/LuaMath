@@ -8,3 +8,8 @@ This is a package to collect, maintain and create functionality to allow the sta
 Pre-requisites
 --------------
 - IUP (http://www.tecgraf.puc-rio.br/iup/) should be present in the Lua Path. This package is used for plotting
+
+Usage
+-----
+
+All code file to use Lua Math should be placed in the root directory and should require LuaMathInit file which adds the proper path and cpath to the lua interpreter paths to find the required modules

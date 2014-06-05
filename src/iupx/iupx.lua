@@ -33,7 +33,7 @@ end
 
 function iupx.pplot (tbl)
 	-- only load this functionality on demand! ---
-	require 'iupxpplot'
+	require 'iupx.iupxpplot'
 	return iupxpplot.pplot(tbl)
 end
 

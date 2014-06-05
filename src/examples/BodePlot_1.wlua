@@ -1,3 +1,6 @@
+require("LuaMathInit")
+--print(package.path)
+--print(package.cpath)
 require "iupx" 
 
 function func(x)

@@ -37,6 +37,12 @@ function iupx.pplot (tbl)
 	return iupxpplot.pplot(tbl)
 end
 
+-- Function to return a Bode plot function
+-- tbl is the table containing all the parameters
+-- .func = single parameter function of the complex frequency s from which the magnitude and phase can be computed
+-- .ini = starting frequency of the plot (default = 0.01)
+-- .finfreq = ending frequency of the plot (default = 1MHz)
+-- .steps = number of steps per decade for the plot
 function iupx.bodePlot(tbl)
 	if type(tbl) ~= "table" then
 		error("Expected table argument",2)

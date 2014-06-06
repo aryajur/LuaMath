@@ -33,7 +33,7 @@ end
 
 function iupx.pplot (tbl)
 	-- only load this functionality on demand! ---
-	require 'iupx.iupxpplot'
+	require 'LuaMath.iupx.iupxpplot'
 	return iupxpplot.pplot(tbl)
 end
 
@@ -47,7 +47,7 @@ function iupx.bodePlot(tbl)
 	if type(tbl) ~= "table" then
 		error("Expected table argument",2)
 	end
-	require "complex"
+	require "LuaMath.complex"
 
 
 	if not tbl.func or not(type(tbl.func) == "function") then

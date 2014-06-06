@@ -2,9 +2,16 @@
 
 local modname = ...
 local math = require("math")
+local type = type
+local print = print
 
 local M = {}
 package.loaded[modname] = M
+if setfenv then
+	setfenv(1,M)
+else
+	_ENV = M
+end
 
 --- To solve the func(x)=0 equations using the false position method http://en.wikipedia.org/wiki/False_position_method
 --- ARGS:
@@ -100,14 +107,19 @@ function solvesec(func,xi,e,m)
 	end
 	local fi = func(xi)
 	local xin = xi - e
+	local err = e
+	while math.abs(fi-func(xin)) < e do
+		err = 2*err
+		xin = xi-err
+	end
 	local fin = func(xin)
 	if not fi or not fin then
 		return nil, "Function returned nil"
 	end
-	if fi <= e then
+	if math.abs(fi) <= e then
 		return xi,fi
 	end
-	if fin <= e then
+	if math.abs(fin) <= e then
 		return xin,fin
 	end
 	
@@ -115,7 +127,7 @@ function solvesec(func,xi,e,m)
 	for i=1,m do
 		xip = xi - (fi*(xi-xin))/(fi-fin)
 		fip = func(xip)
-		if fip<=e then
+		if math.abs(fip)<=e then
 			return xip,fip
 		end
 		xin = xi

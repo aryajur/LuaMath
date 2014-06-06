@@ -55,7 +55,7 @@ function iupx.bodePlot(tbl)
 	local mag = {}
 	local phase = {}
 	local lg = func(math.i*ini)
-	mag[#mag+1] = {ini,20*math.log(math.abs(math.abs(lg)),10)}
+	mag[#mag+1] = {ini,20*math.log(math.abs(lg),10)}
 	phase[#phase+1] = {ini,180/math.pi*math.atan2(lg.i,lg.r)}
 	local magmax = mag[1][2]
 	local magmin = mag[1][2]
@@ -65,7 +65,7 @@ function iupx.bodePlot(tbl)
 	repeat
 		for i=1,steps do
 			lg = func(math.i*(ini+i*(fin-ini)/steps))
-			mag[#mag+1] = {ini+i*(fin-ini)/steps,20*math.log(math.abs(math.abs(lg)),10)}
+			mag[#mag+1] = {ini+i*(fin-ini)/steps,20*math.log(math.abs(lg),10)}
 			phase[#phase+1] = {ini+i*(fin-ini)/steps,180/math.pi*math.atan2(lg.i,lg.r)}
 			if mag[#mag][2]>magmax then
 				magmax = mag[#mag][2]

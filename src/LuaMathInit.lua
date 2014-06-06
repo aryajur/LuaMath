@@ -10,3 +10,14 @@ end
 if not package.cpath:find([[;.\?\?.dll]],1,true) then
 	package.cpath = package.cpath..[[;.\?\?.dll]]
 end
+
+if math.log(10,10) ~= 1 then
+	local origLog = math.log
+	math.log = function(x,base)
+		if not base then
+			return origLog(x)
+		else
+			return origLog(x)/origLog(base)
+		end
+	end
+end

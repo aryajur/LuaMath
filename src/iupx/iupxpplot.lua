@@ -1,9 +1,21 @@
-require 'iuplua'
+local iup = require 'iuplua'
 require "iuplua_pplot"
 
-iupxpplot = {}
+local modname = ...
 
-function iupxpplot.pplot (tbl)
+local type = type
+local ipairs = ipairs
+local pairs = pairs
+
+iupxpplot = {}
+package.loaded[modname] = iupxpplot
+if setfenv then
+	setfenv(1,iupxpplot)
+else
+	_ENV = iupxpplot
+end
+
+function pplot (tbl)
 
 	if tbl.AXS_BOUNDS then
 		local t = tbl.AXS_BOUNDS

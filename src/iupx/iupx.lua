@@ -1,8 +1,21 @@
-require 'iuplua'
+local iup = require 'iuplua'
+local type = type
+local table = table
+local require = require
+local error = error
+local math = math
 
-if not iupx then iupx = {} end
+local modname = ...
 
-function iupx.menu(templ)
+local iupx = {} 
+package.loaded[modname] = iupx
+if setfenv then
+	setfenv(1,iupx)
+else
+	_ENV = iupx
+end
+
+function menu(templ)
 	local items = {}
 	for i = 1,#templ,2 do
 		local label = templ[i]
@@ -13,27 +26,27 @@ function iupx.menu(templ)
 		elseif type(data) == 'nil' then
 			item = iup.separator{}
 		else
-			item = iup.submenu {iupx.menu(data); title = label}
+			item = iup.submenu {menu(data); title = label}
 		end
 		table.insert(items,item)
 	end
 	return iup.menu(items)
 end
 
-function iupx.show_dialog (tbl)
+function show_dialog (tbl)
     local dlg = iup.dialog(tbl)
     dlg:show()
     iup.MainLoop()
 end
 
-function iupx.GetString (title,prompt,default)
+function GetString (title,prompt,default)
 	require "iupluacontrols"
 	return iup.GetParam(title, nil,prompt.." %s\n",default or "")
 end
 
-function iupx.pplot (tbl)
+function pplot (tbl)
 	-- only load this functionality on demand! ---
-	require 'LuaMath.iupx.iupxpplot'
+	local iupxpplot = require 'iupx.iupxpplot'
 	return iupxpplot.pplot(tbl)
 end
 
@@ -43,11 +56,11 @@ end
 -- .ini = starting frequency of the plot (default = 0.01)
 -- .finfreq = ending frequency of the plot (default = 1MHz)
 -- .steps = number of steps per decade for the plot
-function iupx.bodePlot(tbl)
+function bodePlot(tbl)
 	if type(tbl) ~= "table" then
 		error("Expected table argument",2)
 	end
-	require "LuaMath.complex"
+	require "complex"
 
 
 	if not tbl.func or not(type(tbl.func) == "function") then
@@ -91,13 +104,14 @@ function iupx.bodePlot(tbl)
 		fin = ini*10
 		--print("fin=",fin,fin<=1e6)
 	until fin > finfreq
-	local plotmag = iupx.pplot {TITLE = "Magnitude", GRID="YES", GRIDLINESTYLE = "DOTTED", AXS_XSCALE="LOG10", AXS_XMIN=tbl.ini or 0.01, AXS_YMAX = magmax+20, AXS_YMIN=magmin-20}
-	local plotphase = iupx.pplot {TITLE = "Phase", GRID="YES", GRIDLINESTYLE = "DOTTED", AXS_XSCALE="LOG10", AXS_XMIN=tbl.ini or 0.01, AXS_YMAX = phasemax+10, AXS_YMIN = phasemin-10}
+	local plotmag = pplot {TITLE = "Magnitude", GRID="YES", GRIDLINESTYLE = "DOTTED", AXS_XSCALE="LOG10", AXS_XMIN=tbl.ini or 0.01, AXS_YMAX = magmax+20, AXS_YMIN=magmin-20}
+	local plotphase = pplot {TITLE = "Phase", GRID="YES", GRIDLINESTYLE = "DOTTED", AXS_XSCALE="LOG10", AXS_XMIN=tbl.ini or 0.01, AXS_YMAX = phasemax+10, AXS_YMIN = phasemin-10}
 	plotmag:AddSeries(mag)
 	plotphase:AddSeries(phase)
 	--plotmag:AddSeries({{0,0},{10,10},{20,30},{30,45}})
 	return iup.vbox {plotmag,plotphase}
 	--return plotmag
 end
+
 
 

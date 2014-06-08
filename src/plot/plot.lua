@@ -12,6 +12,7 @@ local math = math
 local setmetatable = setmetatable
 local type = type
 local pairs = pairs
+local table = table
 
 local print = print
 local getfenv = getfenv
@@ -36,7 +37,6 @@ local port = 6348
 local plotservercode = [[
 	local args = {...}		-- arguments given by parent
 	for i=1,#args,2 do
-		print(args[i],args[i+1])
 		if args[i] == "PARENT PORT" and args[i+1] and type(args[i+1]) == "number" then
 			parentPort = args[i+1]
 		end
@@ -57,7 +57,7 @@ if not server then
 		return
 	end
 end
-print("Starting plotserver by passing port number=",port)
+--print("Starting plotserver by passing port number=",port)
 local plotserver = llthreads.new(plotservercode, "PARENT PORT", port)
 stat = plotserver:start(true)	-- Start plotserver in a independent non joinable thread
 if not stat then
@@ -77,11 +77,43 @@ if not conn then
 end
 conn:settimeout(2)
 
+function garbageCollect()
+	local i = 1
+--	print("CreatedPlots:")
+--	for k,v in pairs(createdPlots) do
+--		print("-->",k,v)
+--	end
+	while i <= #createdPlots do
+		local inc = true
+		if not plots[createdPlots[i]] then
+			-- Ask plot server to destroy the plot
+			--print("Destroy plot:",createdPlots[i])
+			local sendMsg = {"DESTROY",createdPlots[i]}
+			if not conn:send(t2s.tableToString(sendMsg).."\n") then
+				return nil
+			end
+			sendMsg = conn:receive("*l")
+			if sendMsg then
+				sendMsg = t2s.stringToTable(sendMsg)
+				if sendMsg and sendMsg[1] == "ACKNOWLEDGE" then
+					table.remove(createdPlots,i)
+					inc = false
+				end
+			end			
+		end
+		if inc then
+			i = i + 1
+		end
+	end
+end
+
 -- Plotserver should be running and the connection socket is establed with conn
 -- Now expose the API for plotting
 function plotObjectMeta.__index(t,k)
+	garbageCollect()
 	if k == "AddSeries" then
 		return function (plot,xvalues,yvalues,options)
+			garbageCollect()
 			local plotNum
 			for k,v in pairs(plots) do
 				if v == t then
@@ -107,9 +139,11 @@ function plotObjectMeta.__index(t,k)
 			if sendMsg[1] ~= "ACKNOWLEDGE" then
 				return nil, "Plotserver not responding correctly"
 			end
+			return true
 		end
 	elseif k == "Show" then
 		return function(plot,tbl)
+			garbageCollect()
 			local plotNum
 			for k,v in pairs(plots) do
 				if v == t then
@@ -134,7 +168,8 @@ function plotObjectMeta.__index(t,k)
 			end
 			if sendMsg[1] ~= "ACKNOWLEDGE" then
 				return nil, "Plotserver not responding correctly"
-			end			
+			end	
+			return true
 		end
 	end		-- if k == "AddSeries" then
 end
@@ -144,6 +179,7 @@ function plotObjectMeta.__newindex(t,k,v)
 end
 
 function pplot (tbl)
+	garbageCollect()
 	local sendMsg = {"PLOT",tbl}
 	if not conn:send(t2s.tableToString(sendMsg).."\n") then
 		return nil, "Cannot communicate with plot server"
@@ -168,6 +204,14 @@ function pplot (tbl)
 	return newPlot
 end
 
+function listPlots()
+	print("Local List:")
+	for k,v in pairs(plots) do
+		print(k,v)
+	end
+	conn:send([[{"LIST PLOTS"}]].."\n")
+end
+
 -- Function to return a Bode plot function
 -- tbl is the table containing all the parameters
 -- .func = single parameter function of the complex frequency s from which the magnitude and phase can be computed
@@ -175,6 +219,7 @@ end
 -- .finfreq = ending frequency of the plot (default = 1MHz)
 -- .steps = number of steps per decade for the plot
 function bodePlot(tbl)
+	garbageCollect()
 	if type(tbl) ~= "table" then
 		return nil, "Expected table argument"
 	end
@@ -222,15 +267,13 @@ function bodePlot(tbl)
 		fin = ini*10
 		--print("fin=",fin,fin<=1e6)
 	until fin > finfreq
-	local plotmag = pplot {TITLE = "Magnitude", GRID="YES", GRIDLINESTYLE = "DOTTED", AXS_XSCALE="LOG10", AXS_XMIN=tbl.ini or 0.01, AXS_YMAX = magmax+20, AXS_YMIN=magmin-20}
-	local plotphase = pplot {TITLE = "Phase", GRID="YES", GRIDLINESTYLE = "DOTTED", AXS_XSCALE="LOG10", AXS_XMIN=tbl.ini or 0.01, AXS_YMAX = phasemax+10, AXS_YMIN = phasemin-10}
-	plotmag:AddSeries(mag)
-	plotphase:AddSeries(phase)
+	local magPlot = pplot {TITLE = "Magnitude", GRID="YES", GRIDLINESTYLE = "DOTTED", AXS_XSCALE="LOG10", AXS_XMIN=tbl.ini or 0.01, AXS_YMAX = magmax+20, AXS_YMIN=magmin-20}
+	local phasePlot = pplot {TITLE = "Phase", GRID="YES", GRIDLINESTYLE = "DOTTED", AXS_XSCALE="LOG10", AXS_XMIN=tbl.ini or 0.01, AXS_YMAX = phasemax+10, AXS_YMIN = phasemin-10}
+	magPlot:AddSeries(mag)
+	phasePlot:AddSeries(phase)
 	--plotmag:AddSeries({{0,0},{10,10},{20,30},{30,45}})
 	--return iup.vbox {plotmag,plotphase}
-	plotmag:Show({title="Magnitude Plot",size="HALFxHALF"})
-	plotphase:Show({title="Phase Plot",size="HALFxHALF"})
-	--return plotmag
+	return {mag=magPlot,phase=phasePlot}
 end
 
 

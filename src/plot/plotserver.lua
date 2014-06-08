@@ -13,6 +13,7 @@
 -- REDRAW - Redraw the indicated plot
 -- SET ATTRIBUTES - Set the plot attributes
 -- DESTROY - Command to mark a plot object for destruction
+-- LIST PLOTS - List all plot numbers and objects in memory
 
 -- SOCKET COMMAND TO/FROM PARENT STRUCTURE
 -- It is a Lua table with the command/Response on index 1 followed by extra arguments on following indices
@@ -266,6 +267,11 @@ local function setupTimer()
 						end
 					end
 				elseif msg[1] == "SET ATTRIBUTES" then
+				elseif msg[1] == "LIST PLOTS" then
+					print("Plotserver list:")
+					for k,v in pairs(managedPlots) do
+						print(k,v)
+					end
 				else
 					retmsg = [[{"ERROR","Command not understood"}]].."\n"
 					msg,err = client:send(retmsg)
@@ -299,17 +305,17 @@ local function setupTimer()
 	end		-- function timer:action_cb() ends
 end
 
-print("Starting plotserver")
-print("Parent Port number=",parentPort)
+--print("Starting plotserver")
+--print("Parent Port number=",parentPort)
 if parentPort then
 	if connectParent() then
 		setupTimer()
-		print("Timer is setup. Now starting mainloop")
+		--print("Timer is setup. Now starting mainloop")
 		while not exitProg do
 			iup.MainLoop()
 		end
 	else
-		print("Connect Parent unsuccessful")
+		--print("Connect Parent unsuccessful")
 	end
 end 	-- if parentPort and port then ends
 

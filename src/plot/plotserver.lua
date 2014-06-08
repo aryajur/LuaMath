@@ -25,89 +25,14 @@ socket = require("socket")	-- socket is used to communicate with the main progra
 require("LuaMath")
 local iup = require("iuplua")
 require("iuplua_pplot")
+local t2s = require("plot.tableToString")
 
-local args = {...}		-- arguments given by parent
-local parentPort 
 local timer
 local client			-- client socket object connection to parent process
 local managedPlots = {}
 local plot2Dialog = {}
 local managedDialogs = {}
 local exitProg
-
--- Function to convert a table to a string
--- Metatables not followed
--- Unless key is a number it will be taken and converted to a string
-function tableToString(t)
-	local rL = {cL = 1}	-- Table to track recursion into nested tables (cL = current recursion level)
-	rL[rL.cL] = {}
-	do
-		rL[rL.cL]._f,rL[rL.cL]._s,rL[rL.cL]._var = pairs(t)
-		rL[rL.cL].str = "{"
-		rL[rL.cL].t = t
-		while true do
-			local k,v = rL[rL.cL]._f(rL[rL.cL]._s,rL[rL.cL]._var)
-			rL[rL.cL]._var = k
-			if not k and rL.cL == 1 then
-				break
-			elseif not k then
-				-- go up in recursion level
-				if string.sub(rL[rL.cL].str,-1,-1) == "," then
-					rL[rL.cL].str = string.sub(rL[rL.cL].str,1,-2)
-				end
-				--print("GOING UP:     "..rL[rL.cL].str.."}")
-				rL[rL.cL-1].str = rL[rL.cL-1].str..rL[rL.cL].str.."}"
-				rL.cL = rL.cL - 1
-				rL[rL.cL+1] = nil
-				rL[rL.cL].str = rL[rL.cL].str..","
-			else
-				-- Handle the key and value here
-				if type(k) == "number" then
-					rL[rL.cL].str = rL[rL.cL].str.."["..tostring(k).."]="
-				else
-					rL[rL.cL].str = rL[rL.cL].str..tostring(k).."="
-				end
-				if type(v) == "table" then
-					-- Check if this is not a recursive table
-					local goDown = true
-					for i = 1, rL.cL do
-						if v==rL[i].t then
-							-- This is recursive do not go down
-							goDown = false
-							break
-						end
-					end
-					if goDown then
-						-- Go deeper in recursion
-						rL.cL = rL.cL + 1
-						rL[rL.cL] = {}
-						rL[rL.cL]._f,rL[rL.cL]._s,rL[rL.cL]._var = pairs(v)
-						rL[rL.cL].str = "{"
-						rL[rL.cL].t = v
-						--print("GOING DOWN:",k)
-					else
-						rL[rL.cL].str = rL[rL.cL].str.."\""..tostring(v).."\""
-						rL[rL.cL].str = rL[rL.cL].str..","
-						--print(k,"=",v)
-					end
-				elseif type(v) == "number" then
-					rL[rL.cL].str = rL[rL.cL].str..tostring(v)
-					rL[rL.cL].str = rL[rL.cL].str..","
-					--print(k,"=",v)
-				else
-					rL[rL.cL].str = rL[rL.cL].str..string.format("%q",tostring(v))
-					rL[rL.cL].str = rL[rL.cL].str..","
-					--print(k,"=",v)
-				end		-- if type(v) == "table" then ends
-			end		-- if not rL[rL.cL]._var and rL.cL == 1 then ends
-		end		-- while true ends here
-	end		-- do ends
-	if string.sub(rL[rL.cL].str,-1,-1) == "," then
-		rL[rL.cL].str = string.sub(rL[rL.cL].str,1,-2)
-	end
-	rL[rL.cL].str = rL[rL.cL].str.."}"
-	return rL[rL.cL].str
-end
 
 local function connectParent()
 	-- Try opening the TCP server
@@ -180,23 +105,6 @@ function pplot (tbl)
     return plot
 end
 
--- convert str to table
-local stringToTable(str)
-	local f
-	local safeenv = {}
-	if loadstring then
-		f = loadstring("return "..str)
-		setfenv(f,safeenv)
-	else
-		f = load("return "..str,nil,"bt",safeenv)
-	end
-	local stat,tab
-	stat,tab = pcall(f)
-	if stat and tab and type(tab) == "table" then
-		return tab
-	end
-end
-
 -- Main function to launch the iup loop
 local function setupTimer()
 	-- Setup timer to run housekeeping
@@ -243,7 +151,8 @@ local function setupTimer()
 		msg,err = client:receive("*l")
 		if msg then
 			-- convert msg to table
-			msg = stringToTable(msg)
+			--print(msg)
+			msg = t2s.stringToTable(msg)
 			if msg then
 				if msg[1] == "END" then
 					exitProg = true
@@ -264,8 +173,8 @@ local function setupTimer()
 				elseif msg[1] == "ADD DATA" then
 					if managedPlots[msg[2]] then
 						-- Add the data to the plot
-						managedPlots[msg[2]]:AddSeries(msg[3])
-						retmsg = [[{ACKNOWLEDGE"}]].."\n"
+						managedPlots[msg[2]]:AddSeries(msg[3],msg[4],msg[5])
+						retmsg = [[{"ACKNOWLEDGE"}]].."\n"
 					else
 						retmsg = [[{"ERROR","No Plot present at that index"}]].."\n"
 					end
@@ -280,12 +189,22 @@ local function setupTimer()
 					end
 				elseif msg[1] == "SHOW PLOT" then
 					if managedPlots[msg[2]] then
+						if not msg[3] or not type(msg[3]) == "table" then
+							msg[3] = {title="Plot "..tostring(msg[2]),size="HALFxHALF"}
+						else
+							if msg[3].title then
+								msg[3].title = "Plot "..tostring(msg[2])..":"..msg[3].title
+							else
+								msg[3].title = "Plot "..tostring(msg[2])
+							end
+						end
 						msg[3][1] = managedPlots[msg[2]]
 						managedDialogs[#managedDialogs + 1] = iup.dialog(msg[3])
 						managedDialogs[#managedDialogs]:show()
 						plot2Dialog[msg[3][1]] =  managedDialogs[#managedDialogs]
 						local dlg = #managedDialogs
-						function managedDialogs[#managedDialogs]:close_cb()
+						local dlgObject = managedDialogs[#managedDialogs]
+						function dlgObject:close_cb()
 							for k,v in pairs(plot2Dialog) do
 								if v == managedDialogs[dlg] then
 									plot2Dialog[k] = nil
@@ -295,7 +214,7 @@ local function setupTimer()
 							managedDialogs[dlg] = nil
 							return iup.IGNORE
 						end
-						retmsg = [[{ACKNOWLEDGE"}]].."\n"
+						retmsg = [[{"ACKNOWLEDGE"}]].."\n"
 					else
 						retmsg = [[{"ERROR","No Plot present at that index"}]].."\n"
 					end
@@ -311,7 +230,7 @@ local function setupTimer()
 				elseif msg[1] == "REDRAW" then
 					if managedPlots[msg[2]] then
 						managedPlots[msg[2]]:Redraw()
-						retmsg = [[{ACKNOWLEDGE"}]].."\n"
+						retmsg = [[{"ACKNOWLEDGE"}]].."\n"
 					else
 						retmsg = [[{"ERROR","No Plot present at that index"}]].."\n"
 					end
@@ -333,7 +252,7 @@ local function setupTimer()
 						else
 							destroyQ[#destroyQ + 1] = managedPlots[msg[2]]
 						end
-						retmsg = [[{ACKNOWLEDGE"}]].."\n"
+						retmsg = [[{"ACKNOWLEDGE"}]].."\n"
 					else
 						retmsg = [[{"ERROR","No Plot present at that index"}]].."\n"
 					end
@@ -380,18 +299,17 @@ local function setupTimer()
 	end		-- function timer:action_cb() ends
 end
 
-
-for i=1,#args,2 do
-	if args[i] == "PARENT PORT" and args[i+1] and type(args[i+1]) == "number" then
-		parentPort = args[i+1]
-	end
-end
+print("Starting plotserver")
+print("Parent Port number=",parentPort)
 if parentPort then
 	if connectParent() then
 		setupTimer()
+		print("Timer is setup. Now starting mainloop")
 		while not exitProg do
 			iup.MainLoop()
 		end
+	else
+		print("Connect Parent unsuccessful")
 	end
 end 	-- if parentPort and port then ends
 

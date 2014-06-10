@@ -137,3 +137,68 @@ function solvesec(func,xi,e,m)
 	end
 	return xip,fip
 end
+
+--- To solve the func(x)=0 equations using Newton-Raphson method
+--- ARGS:
+--- func = Expects a single dimension function
+--- xi = initial root guess
+--- e = absolute error i.e. solution is xs where func(xs)=e [OPT,DEF=xi/m]
+--- m = total number of iterations [OPT,DEF=1e3]
+--- RETURNS
+--- function returns final x root and the error residue
+function solvenr(func,xi,e,m)
+--- --
+	if not type(func) == "function" then
+		return nil, "First argument needs to be a function to be solved func(x) = 0 "
+	end
+	if not type(xi) == "number" then
+		return nil, "Second argument should be a number as the initial guess solution"
+	end
+	m = m or 1000
+	if not type(m) =="number" then
+		return nil, "Fourth argument should be a number for number of iterations to run"
+	end
+	e = e or xi/m
+	if not type(e) =="number" then
+		return nil, "Third argument should be a number as the absolute error"
+	end
+	local fi = func(xi)
+	local xin = xi - e
+	local err = e
+	while math.abs(fi-func(xin)) < e do
+		err = 2*err
+		xin = xi-err
+	end
+	local fin = func(xin)
+	if not fi or not fin then
+		return nil, "Function returned nil"
+	end
+	if math.abs(fi) <= e then
+		return xi,fi
+	end
+	if math.abs(fin) <= e then
+		return xin,fin
+	end
+	
+	local xip,fip
+	for i=1,m do
+		xip = xi - (fi*(xi-xin))/(fi-fin)
+		fip = func(xip)
+		if math.abs(fip)<=e then
+			return xip,fip
+		end
+		xi = xip
+		fi = fip
+		xin = xi - err
+		while math.abs(fi-func(xin)) > e do
+			err = err/2
+			xin = xi-err
+		end
+		while math.abs(fi-fin) < e do
+			err = 2*err
+			xin = xi-err
+			fin = func(xin)
+		end
+	end
+	return xip,fip
+end

@@ -1,3 +1,6 @@
 [submodule "src/complex"]
 	path = src/complex
 	url = git://github.com/aryajur/lua-complex
+[submodule "src/lua-plot"]
+	path = src/lua-plot
+	url = git://github.com/aryajur/lua-plot.git

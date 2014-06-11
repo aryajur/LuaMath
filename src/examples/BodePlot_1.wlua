@@ -1,7 +1,7 @@
 require("LuaMath")
 --print(package.path)
 --print(package.cpath)
-local plot = require "plot" 
+local plot = require "lua-plot" 
 
 function func(x)
 	return 1000/((1+x)*(1+x/100))

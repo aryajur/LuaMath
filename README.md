@@ -13,7 +13,7 @@ Pre-requisites
 Usage
 -----
 
-All code file to use Lua Math should be placed in the root directory and should require LuaMathInit file which adds the proper path and cpath to the lua interpreter paths to find the required modules
+All code file to use Lua Math should be placed in the root directory and should require LuaMath file which adds the proper path and cpath to the lua interpreter paths to find the required modules
 
 References
 ----------

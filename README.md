@@ -14,3 +14,8 @@ Usage
 -----
 
 All code file to use Lua Math should be placed in the root directory and should require LuaMathInit file which adds the proper path and cpath to the lua interpreter paths to find the required modules
+
+References
+----------
+- Complex numbers (Thanks to library from Philippe Castagliola http://philippe.castagliola.free.fr/LUA/complex.html)
+- Basic plotting (Using IUP and help from Steve Donovan's code http://www.tecgraf.puc-rio.br/iup/en/basic/)

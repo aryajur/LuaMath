@@ -15,6 +15,27 @@ Usage
 
 All code file to use Lua Math should be placed in the root directory and should require LuaMath file which adds the proper path and cpath to the lua interpreter paths to find the required modules
 
+Bode Plot example
+
+```lua
+require("LuaMath")
+local plot = require "lua-plot" 
+
+function func(s)
+	return 1000/((1+s)*(1+s/100))
+end
+
+local bp = plot.bodePlot{
+	func = func,
+	ini = 0.01,
+	finfreq = 1000,
+	steps = 20
+}
+
+bp.mag:Show({title="Magnitude Plot",size="HALFxHALF"})
+bp.phase:Show({title="Phase Plot",size="HALFxHALF"})
+```
+
 References
 ----------
 - Complex numbers (Thanks to library from Philippe Castagliola http://philippe.castagliola.free.fr/LUA/complex.html)

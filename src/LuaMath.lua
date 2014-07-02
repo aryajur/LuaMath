@@ -34,4 +34,4 @@ if math.log(10,10) ~= 1 then
 	end
 end
 
-__LuaMathVersion = "1.14.06.05"
+__LuaMathVersion = "1.14.07.01"

@@ -1,4 +1,5 @@
 -- Module to provide circle discretization
+-- This module provides useful routines for circles
 
 local modname = ...
 local math = require("math")
@@ -11,4 +12,10 @@ if setfenv then
 	setfenv(1,M)
 else
 	_ENV = M
+end
+
+-- Function to discretize the area of a circle using rectangles
+function discreteRect(radius)
+	
+	
 end

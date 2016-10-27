@@ -9,6 +9,7 @@ Pre-requisites
 --------------
 - IUP (http://www.tecgraf.puc-rio.br/iup/) should be present in the Lua Path. This package is used for plotting
 - llthreads (https://github.com/Neopallium/lua-llthreads) should be present in the Lua Path. This package is used to create a separate thread which runs a plot server
+- subModSearcher (https://github.com/aryajur/subModSearcher) should be present in the Lua Path. This package makes finding sub-modules easier.
 
 Usage
 -----

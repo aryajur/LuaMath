@@ -1,26 +1,20 @@
-if not package.path:find([[;.\?.lua]],1,true) and not (package.path:sub(1,#[[.\?.lua;]])==[[.\?.lua;]]) then
-	package.path = [[.\?.lua;]]..package.path
-end
-if not package.path:find([[;.\?\init.lua]],1,true) and not (package.path:sub(1,#[[.\?\init.lua;]])==[[.\?\init.lua;]]) then
-	package.path = [[.\?\init.lua;]]..package.path
-end
-if not package.path:find([[;.\LuaMath\?.lua]],1,true) and not (package.path:sub(1,#[[.\LuaMath\?.lua;]])==[[.\LuaMath\?.lua;]]) then
-	package.path = [[.\LuaMath\?.lua;]]..package.path
-end
-if not package.path:find([[;.\LuaMath\?\init.lua]],1,true) and not (package.path:sub(1,#[[.\LuaMath\?\init.lua;]])==[[.\LuaMath\?\init.lua;]]) then
-	package.path = [[.\LuaMath\?\init.lua;]]..package.path
-end
-if not package.cpath:find([[;.\?.dll]],1,true) and not (package.cpath:sub(1,#[[.\?.dll;]])==[[.\?.dll;]]) then
-	package.cpath = [[.\?.dll;]]..package.cpath
-end
-if not package.cpath:find([[;.\?\?.dll]],1,true) and not (package.cpath:sub(1,#[[.\?\?.dll;]])==[[.\?\?.dll;]]) then
-	package.cpath = [[.\?\?.dll;]]..package.cpath
-end
-if not package.cpath:find([[;.\LuaMath\?.dll]],1,true) and not (package.cpath:sub(1,#[[.\LuaMath\?.dll;]])==[[.\LuaMath\?.dll;]]) then
-	package.cpath = [[.\LuaMath\?.dll;]]..package.cpath
-end
-if not package.cpath:find([[;.\LuaMath\?\?.dll]],1,true) and not (package.cpath:sub(1,#[[.\LuaMath\?\?.dll;]])==[[.\LuaMath\?\?.dll;]]) then
-	package.cpath = [[.\LuaMath\?\?.dll;]]..package.cpath
+-- Include the sub modules searcher 
+require("subModSearcher")
+-- Setup a searcher to check for LuaMath modules also
+package.searchers[#package.searchers + 1] = function(mod)
+	-- Check if this is a multi hierarchy module
+	-- modify the module name to include LuaMath
+	local newMod = "LuaMath."..mod
+	-- Now check if we can find this using all the searchers
+	local totErr = ""
+	for i = 1,#package.searchers do
+		local r = package.searchers[i](newMod)
+		if type(r) == "function" then
+			return r
+		end
+		totErr = totErr..r
+	end
+	return totErr
 end
 
 if math.log(10,10) ~= 1 then
@@ -34,4 +28,4 @@ if math.log(10,10) ~= 1 then
 	end
 end
 
-__LuaMathVersion = "1.14.07.02"
+__LuaMathVersion = "1.16.10.27"

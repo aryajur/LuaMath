@@ -27,7 +27,7 @@ function discreteRect(radius,seg)
 	-- The 1st one is the central square
 	rects[1] = {l=math.sqrt(2)*radius,w=math.sqrt(2)*radius,x=0,y=0}
 	local totArea = rects[1].l^2
-	local d = radius/n*(1-1/math.sqrt(2))
+	local d = radius/(n+1)*(1-1/math.sqrt(2))
 	local p = rects[1].l/2
 	for i = 1,n do
 		local m = math.sqrt(radius^2-(p+d)^2)
@@ -36,7 +36,7 @@ function discreteRect(radius,seg)
 		rects[#rects + 1] = {l = d, w = 2*m, x = -(p+d/2), y = 0}
 		rects[#rects + 1] = {l = d, w = 2*m, x = p+d/2, y = 0}
 		rects[#rects + 1] = {l = 2*m, w = d, x = 0, y = -(p+d/2)}
-		totArea = 8*m*d
+		totArea = totArea + 8*m*d
 		-- Update the p
 		p = p+d
 	end

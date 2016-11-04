@@ -3,8 +3,6 @@
 
 local modname = ...
 local math = require("math")
-local type = type
-local print = print
 
 local M = {}
 package.loaded[modname] = M

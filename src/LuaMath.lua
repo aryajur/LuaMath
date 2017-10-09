@@ -1,6 +1,7 @@
 -- Include the sub modules searcher 
 require("subModSearcher")
 -- Setup a searcher to check for LuaMath modules also
+local skipSearcher
 package.searchers[#package.searchers + 1] = function(mod)
 	-- Check if this is a multi hierarchy module
 	-- modify the module name to include LuaMath
@@ -8,14 +9,18 @@ package.searchers[#package.searchers + 1] = function(mod)
 	-- Now check if we can find this using all the searchers
 	local totErr = ""
 	for i = 1,#package.searchers do
-		local r = package.searchers[i](newMod)
-		if type(r) == "function" then
-			return r
+		if package.searchers[i] ~= skipSearcher then
+			local r = package.searchers[i](newMod)
+			if type(r) == "function" then
+				return r
+			end
+			totErr = totErr..r
 		end
-		totErr = totErr..r
 	end
 	return totErr
 end
+
+skipSearcher = package.searchers[#package.searchers]
 
 if math.log(10,10) ~= 1 then
 	local origLog = math.log

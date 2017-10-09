@@ -1,8 +1,5 @@
 require("LuaMath")
---print(package.path)
---print(package.cpath)
-dofile([[../../__Lua/Lua53/subModSearcher.lua]])
-plot = require "LuaMath.lua-plot" 
+plot = require "lua-plot" 
 
 function func(x)
 	return 1000/((1+x)*(1+x/100))

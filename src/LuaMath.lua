@@ -1,5 +1,6 @@
 -- Include the sub modules searcher 
 require("subModSearcher")
+
 -- Setup a searcher to check for LuaMath modules also
 local skipSearcher
 package.searchers[#package.searchers + 1] = function(mod)

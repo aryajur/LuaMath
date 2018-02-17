@@ -42,3 +42,5 @@ print("ATTRIBUTES",plot:Attributes{
 })
 print("SHOW",plot:Show())
 
+io.read()
+

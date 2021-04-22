@@ -108,7 +108,7 @@ function solvesec(func,xi,e,m)
 	local fi = func(xi)
 	local xin = xi - e
 	local err = e
-	while math.abs(fi-func(xin)) < e do
+	while math.abs(fi-func(xin)) < math.abs(e) do
 		err = 2*err
 		xin = xi-err
 	end
@@ -116,10 +116,10 @@ function solvesec(func,xi,e,m)
 	if not fi or not fin then
 		return nil, "Function returned nil"
 	end
-	if math.abs(fi) <= e then
+	if math.abs(fi) <= math.abs(e) then
 		return xi,fi
 	end
-	if math.abs(fin) <= e then
+	if math.abs(fin) <= math.abs(e) then
 		return xin,fin
 	end
 	
@@ -127,7 +127,7 @@ function solvesec(func,xi,e,m)
 	for i=1,m do
 		xip = xi - (fi*(xi-xin))/(fi-fin)
 		fip = func(xip)
-		if math.abs(fip)<=e then
+		if math.abs(fip)<=math.abs(e) then
 			return xip,fip
 		end
 		xin = xi
@@ -165,7 +165,7 @@ function solvenr(func,xi,e,m)
 	local fi = func(xi)
 	local xin = xi - e
 	local err = e
-	while math.abs(fi-func(xin)) < e do
+	while math.abs(fi-func(xin)) < math.abs(e) do
 		err = 2*err
 		xin = xi-err
 	end
@@ -173,10 +173,10 @@ function solvenr(func,xi,e,m)
 	if not fi or not fin then
 		return nil, "Function returned nil"
 	end
-	if math.abs(fi) <= e then
+	if math.abs(fi) <= math.abs(e) then
 		return xi,fi
 	end
-	if math.abs(fin) <= e then
+	if math.abs(fin) <= math.abs(e) then
 		return xin,fin
 	end
 	
@@ -184,17 +184,17 @@ function solvenr(func,xi,e,m)
 	for i=1,m do
 		xip = xi - (fi*(xi-xin))/(fi-fin)
 		fip = func(xip)
-		if math.abs(fip)<=e then
+		if math.abs(fip)<=math.abs(e) then
 			return xip,fip
 		end
 		xi = xip
 		fi = fip
 		xin = xi - err
-		while math.abs(fi-func(xin)) > e do
+		while math.abs(fi-func(xin)) > math.abs(e) do
 			err = err/2
 			xin = xi-err
 		end
-		while math.abs(fi-fin) < e do
+		while math.abs(fi-fin) < math.abs(e) do
 			err = 2*err
 			xin = xi-err
 			fin = func(xin)

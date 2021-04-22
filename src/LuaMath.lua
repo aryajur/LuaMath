@@ -7,12 +7,14 @@ package.searchers[#package.searchers + 1] = function(mod)
 	-- Check if this is a multi hierarchy module
 	-- modify the module name to include LuaMath
 	local newMod = "LuaMath."..mod
+	--print("Search for "..newMod)
 	-- Now check if we can find this using all the searchers
 	local totErr = ""
 	for i = 1,#package.searchers do
 		if package.searchers[i] ~= skipSearcher then
 			local r = package.searchers[i](newMod)
 			if type(r) == "function" then
+				--print("Found",r)
 				return r
 			end
 			totErr = totErr..r
@@ -33,5 +35,3 @@ if math.log(10,10) ~= 1 then
 		end
 	end
 end
-
-__LuaMathVersion = "1.16.10.27"

@@ -162,6 +162,30 @@ function solvenr(func,xi,e,m)
 	if not type(e) =="number" then
 		return nil, "Third argument should be a number as the absolute error"
 	end
+	-- New implementation from Numerical Methods for Non Linear Engineering Models - Hauser
+	local FACT = 1e-6
+	local fx,cx
+	local x = xi
+	local nend = m
+	local abs = math.abs
+	for i = 1,m do
+		local dx = x*FACT
+		if dx==0 then 
+			dx=FACT -- To protect against zero
+		end 
+		fx = func(x)
+		cx = fx - func(x+dx)
+		cx  = fx*dx/cx	-- Correction to x value
+		x = x+cx
+		dx = abs(cx)+abs(x)
+		if dx == 0 or abs(cx/dx) < abs(e) then 
+			nend = i
+			break
+		end
+	end
+	return x,fx,nend,cx
+	--[[
+	-- Old implementation
 	local fi = func(xi)
 	local xin = xi - e
 	local err = e
@@ -201,4 +225,5 @@ function solvenr(func,xi,e,m)
 		end
 	end
 	return xip,fip
+	]]
 end

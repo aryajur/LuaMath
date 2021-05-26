@@ -8,7 +8,7 @@ package.loaded[modname] = M
 if setfenv then
 	setfenv(1,M)
 else
-	_ENV
+	_ENV = M
 end
 
 -- Arithmetic mean of a series of numbers

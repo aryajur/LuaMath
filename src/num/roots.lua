@@ -184,46 +184,4 @@ function solvenr(func,xi,e,m)
 		end
 	end
 	return x,fx,nend,cx
-	--[[
-	-- Old implementation
-	local fi = func(xi)
-	local xin = xi - e
-	local err = e
-	while math.abs(fi-func(xin)) < math.abs(e) do
-		err = 2*err
-		xin = xi-err
-	end
-	local fin = func(xin)
-	if not fi or not fin then
-		return nil, "Function returned nil"
-	end
-	if math.abs(fi) <= math.abs(e) then
-		return xi,fi
-	end
-	if math.abs(fin) <= math.abs(e) then
-		return xin,fin
-	end
-	
-	local xip,fip
-	for i=1,m do
-		xip = xi - (fi*(xi-xin))/(fi-fin)
-		fip = func(xip)
-		if math.abs(fip)<=math.abs(e) then
-			return xip,fip
-		end
-		xi = xip
-		fi = fip
-		xin = xi - err
-		while math.abs(fi-func(xin)) > math.abs(e) do
-			err = err/2
-			xin = xi-err
-		end
-		while math.abs(fi-fin) < math.abs(e) do
-			err = 2*err
-			xin = xi-err
-			fin = func(xin)
-		end
-	end
-	return xip,fip
-	]]
 end

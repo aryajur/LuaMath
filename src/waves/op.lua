@@ -107,3 +107,19 @@ function cross(wave,t,rise,fall,pts)
 	table.sort(events)
 	return events
 end
+
+-- Function to calculate the RMS value of the given wave 
+-- fs is the file structure
+-- wave is the vector containing the waveform data
+-- start is the start index from where the integral is to be calculated (default = 1)
+-- stop is the stop index up till where the integral will be done (default = #t)
+function getRMS(wave,t,start,stop)
+	local sum = 0
+	start = start or 1
+	stop = stop or #t
+	for i = start+1,stop do
+		sum = sum + (wave[i]^2)*(t[i]-t[i-1])
+	end
+	-- Mean sqrt
+	return math.sqrt(sum/(t[stop]-t[start]))
+end

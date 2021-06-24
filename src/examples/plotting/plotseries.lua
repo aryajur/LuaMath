@@ -14,7 +14,7 @@ end
 
 p = plot.plot({})
 
-p:AddSeries(nil,y)
+p:AddSeries(y,nil,{DS_MODE="MARK"})
 
 p:Show()
 

@@ -16,6 +16,8 @@ else
 	_ENV = M
 end
 
+_VERSION = "1.21.06.24"
+
 -- Discrete Fourier Series calculator
 -- NOTE: Discrete fourier Series is for a periodic signal. This assumes the
 function dft(sig)
@@ -26,12 +28,13 @@ function dft(sig)
 	local N = #sig
 	local fac = -math.i*2*math.pi/N
 	local fin = N/2%1==0 and N/2 or (N+1)/2
+	local fac1 = 2/N
 	for k = 1,fin+1 do
 		local sum = 0
 		for n = 1,N do
-			sum = sum + sig[n]*math.exp(fac*(k-1)*n)
+			sum = sum + sig[n]*math.exp(fac*(k-1)*(n-1))
 		end
-		Xk[k] = sum
+		Xk[k] = sum*fac1
 	end
 	return Xk
 end
@@ -55,12 +58,13 @@ function nudft2(sig,tsam)
 	local T = tsam[#tsam]-tsam[1]
 	local fac = -math.i*2*math.pi/T
 	local fin = N/2%1==0 and N/2 or (N+1)/2
+	local fac1 = 2/N
 	for k = 1,fin+1 do
 		local sum = 0
 		for n = 1,N do
 			sum = sum + sig[n]*math.exp(fac*(k-1)*tsam[n])
 		end
-		Xk[k] = sum
+		Xk[k] = sum*fac1
 	end
-	return Xk
+	return Xk,2*math*pi/T
 end

@@ -35,3 +35,7 @@ if math.log(10,10) ~= 1 then
 		end
 	end
 end
+
+return {
+	_VERSION = "1.21.06.24"		-- LuaMath version tracking
+}

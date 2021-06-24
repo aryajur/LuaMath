@@ -17,6 +17,8 @@ else
 	_ENV = M
 end
 
+_VERSION = "1.21.06.24"
+
 -- Function to do the Binomial Smoothing on a signal
 -- sig is the signal array
 -- pts [DEFAULT=3] are the number of points of the Binomial smoothing. It has to be odd. If not then 1 is added to pts

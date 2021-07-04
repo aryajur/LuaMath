@@ -36,6 +36,15 @@ if math.log(10,10) ~= 1 then
 	end
 end
 
+if math.atan(1) == math.atan(1,2) then
+	math.atan = function(y,x)
+		x = x or 1
+		return math.atan2(y,x)
+	end
+else
+	math.atan2 = math.atan
+end
+
 return {
-	_VERSION = "1.21.06.24"		-- LuaMath version tracking
+	_VERSION = "1.21.07.04"		-- LuaMath version tracking
 }

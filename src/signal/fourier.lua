@@ -19,7 +19,10 @@ end
 _VERSION = "1.21.06.25"
 
 -- Discrete Fourier Series calculator
--- NOTE: Discrete fourier Series is for a periodic signal. This assumes the
+-- NOTE: Discrete fourier Series is for a periodic signal. This assumes that there are integer number of periods in the signal array
+--		 If there are not the successive repetition of the signal creates sharp discontinuities and result in unexpected frequency 
+--		 components in the dft result. To use such signals the signal should be smoothed out using a filter like the binomial filter
+--		 which is in the filter module.
 function dft(sig)
 	if type(sig) ~= "table" or #sig==0 then
 		return nil,"Signal should be non zero arrays."
@@ -98,6 +101,8 @@ end
 -- This makes the number of samples more so the mirror spectrum position incorrect
 -- So in the end the spectrum is truncated to half of the original vector length to return only one
 -- half of the spectrum which is the correct result.
+
+-- Again like in dft if there are no integer number of cycles for the slowest frequency make sure to use smoothing to get a more accurate spectrum
 function fft(vect)
 	-- Check if vect length is power of 2
 	local n = #vect

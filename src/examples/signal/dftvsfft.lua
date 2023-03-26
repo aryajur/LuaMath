@@ -2,12 +2,14 @@
 
 require("LuaMath")
 fourier = require("signal.fourier")
+luafft = require("signal.luafft")
 
 -- Make a sine wave of frequency 1KHz
 sigsine = {}
 x = {}
 
-local totSam = 512
+-- The number of samples makes a big difference to the fft spectrum. See with samples of 500 and 700.
+local totSam = 700
 local T = 1e-3
 local totT = T*5
 local Ts = totT/totSam
@@ -17,7 +19,7 @@ for t = 0,totT-Ts,Ts do	-- 10 us step to 5ms (5 periods with 100 samples in each
 	x[#x + 1] = t
 	sigsine[#x] = math.sin(2*math.pi*t/T)
 end
-print("Plot the wave")
+print("Plot the wave. Total samples=",#x)
 -- Plot the waveform
 plot = require("lua-plot")
 p1 = plot.plot({})
@@ -46,17 +48,25 @@ p:AddSeries(f,fsine)
 p:Show()
 io.read()
 
+-- Make size to 720
+for i = 1,21 do
+	sigsine[#sigsine + 1] = 0
+end
+
 print("Take the fourier transform using fft")
 print("Time:",os.clock())
-fsigsine = fourier.fft(sigsine)
+fsigsine = luafft.fft(sigsine)
+newSam = #sigsine
+--fsigsine,newSam = fourier.fft(sigsine)
 print("Time:",os.clock())
 
 f = {}
 fsine = {}
-fbin = 1/(Ts*totSam)
+fbin = 1/(Ts*newSam)
 for i = 1,#fsigsine do
 	f[i] = (i-1)*fbin
-	fsine[i] = math.abs(fsigsine[i])*(2/totSam) --  since totSam samples and half od the spectrum is displayed so adding energy for the other half od the spectrum.
+	fsine[i] = math.abs(fsigsine[i])*(2/newSam) --  since totSam samples and half od the spectrum is displayed so adding energy for the other half od the spectrum.
+	print(fsine[i])
 end
 
 -- Now plot the transform

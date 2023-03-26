@@ -23,6 +23,19 @@ _VERSION = "1.21.06.25"
 --		 If there are not the successive repetition of the signal creates sharp discontinuities and result in unexpected frequency 
 --		 components in the dft result. To use such signals the signal should be smoothed out using a filter like the binomial filter
 --		 which is in the filter module.
+-- To get the final frequency bins do something like:
+--[[
+f = {}
+fsine = {}
+fbin = 1/(Ts*totSam)
+for i = 1,#fsigsine do
+	f[i] = (i-1)*fbin
+	fsine[i] = math.abs(fsigsine[i])
+end
+
+where fsigsine is the output from the dft function (half spectrum)
+
+]]
 function dft(sig)
 	if type(sig) ~= "table" or #sig==0 then
 		return nil,"Signal should be non zero arrays."
@@ -31,7 +44,7 @@ function dft(sig)
 	local N = #sig
 	local fac = -math.i*2*math.pi/N
 	local fin = N/2%1==0 and N/2 or (N+1)/2
-	local fac1 = 2/N
+	local fac1 = 2/N	-- Scaling each fourier coefficient by a factor of 2 since we are only calculating the 1 sided spectrum so the full power has to be doubled
 	for k = 1,fin do
 		local sum = 0
 		for n = 1,N do
@@ -75,7 +88,7 @@ end
 -- FFT Algorithm from https://rosettacode.org/wiki/Fast_Fourier_transform#Lua
 -- Cooley–Tukey FFT (in-place, divide-and-conquer)
 -- Higher memory requirements and redundancy although more intuitive
-local function ffti(vect)
+function ffti(vect)
 	local n=#vect
 	if n<=1 then return vect end
 	-- divide  
@@ -122,5 +135,5 @@ function fft(vect)
 	local vfft = ffti(newvect)
 	-- Take only half the spectrum
 	
-	return table.move(vfft,1,n/2%1==0 and n/2 or (n+1)/2,1,{})
+	return table.move(vfft,1,n/2%1==0 and n/2 or (n+1)/2,1,{}),#newvect
 end

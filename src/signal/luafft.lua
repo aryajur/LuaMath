@@ -47,7 +47,7 @@ end
 --@param n	Size
 --
 --@return	Next fast size.
-local function next_possible_size(n)
+function luafft.next_possible_size(n)
   local m = n
   while (1) do
     m = n
@@ -75,7 +75,7 @@ function luafft.fft(input, inverse)
 	--the size of input defines the number of total points
 	local num_points = #input
 
-	assert(#input == next_possible_size(#input), string.format("The size of your input is not correct. For your size=%i, use a table of size=%i with zeros at the end.", #input, next_possible_size(#input)))
+	assert(#input == luafft.next_possible_size(#input), string.format("The size of your input is not correct. For your size=%i, use a table of size=%i with zeros at the end.", #input, luafft.next_possible_size(#input)))
 
 	local twiddles = {}
 	for i = 0,num_points-1 do

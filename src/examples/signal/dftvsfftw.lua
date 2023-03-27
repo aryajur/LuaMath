@@ -1,6 +1,8 @@
--- Script to demonstrate signal fourier transform using dft vs fft
+-- Script to demonstrate signal fourier transform using dft vs fft using FFTW library
 
 require("LuaMath")
+-- Very interesting to compare the 700 samples signal transform between luafft and fftw.
+-- FFTW seems much better than luafft.
 fourier = require("signal.fourier")
 
 -- Make a sine wave of frequency 1KHz
@@ -34,6 +36,9 @@ print("Time:",os.clock())
 f = {}
 fsine = {}
 fbin = 1/(Ts*totSam)
+print("fbin="..fbin)
+print("samples="..#sigsine)
+print("fft samples="..#fsigsine)
 for i = 1,#fsigsine do
 	f[i] = (i-1)*fbin
 	fsine[i] = math.abs(fsigsine[i])
@@ -47,10 +52,14 @@ p:AddSeries(f,fsine)
 p:Show()
 io.read()
 
-
 print("Take the fourier transform using fft")
 print("Time:",os.clock())
-fsigsine,newSam = fourier.luafft(sigsine)
+fsigsine,msg = fourier.fftw(sigsine)
+if not fsigsine then
+	print("Error: "..msg)
+	os.exit()
+end
+newSam = totSam --msg
 --fsigsine,newSam = fourier.fft(sigsine)
 print("Time:",os.clock())
 
@@ -58,6 +67,9 @@ f = {}
 fsine = {}
 fbin = 1/(Ts*newSam)
 print("fbin="..fbin)
+print("samples="..#sigsine)
+print("returned samples="..msg)
+print("fft samples="..#fsigsine)
 for i = 1,#fsigsine do
 	f[i] = (i-1)*fbin
 	fsine[i] = math.abs(fsigsine[i])*(2/newSam) --  since totSam samples and half od the spectrum is displayed so adding energy for the other half od the spectrum.

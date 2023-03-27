@@ -5,6 +5,8 @@ local math = require("math")
 local table = require("table")
 require("complex")
 local type = type
+local require = require
+local pcall = pcall
 
 local print = print
 
@@ -136,4 +138,71 @@ function fft(vect)
 	-- Take only half the spectrum
 	
 	return table.move(vfft,1,n/2%1==0 and n/2 or (n+1)/2,1,{}),#newvect
+end
+
+-- This is the wrapper to the fourier transform with the FFTW library
+-- It transforms the vector to an interleaved array where the interleaved definition is here: https://www.fftw.org/fftw3_doc/Interleaved-and-split-arrays.html
+-- It is real and complex values interleaved
+-- Then it also takes half the sectrum
+function fftw(vect)
+	local stat,msg = pcall(require,"fftw")
+	if not stat then
+		return nil,msg
+	end
+	local fftw = msg
+	local newV = {}
+	local n = #vect
+	for i = 1,n do
+		if type(vect[i]) == "complex" then
+			newV[(i-1)*2+1] = vect[i]:real()
+			newV[2*i] = vect[i]:imag()
+		else
+			newV[(i-1)*2+1] = vect[i]
+			newV[i*2] = 0
+		end
+	end
+	-- Now take the fourier transform using fftw
+	local forward_plan = fftw.plan_dft_1d (n)
+	local vfft = forward_plan:execute_dft (newV)
+	local vfftN = {}
+	-- Convert to complex
+	for i = 1,#vfft,2 do
+		vfftN[(i-1)/2+1] = vfft[i]+math.i*vfft[i+1]
+	end
+	--[[
+	-- Do the shift
+	if #vfftN % 2 == 0 then
+		-- Even number
+		local mid = #vfftN/2
+		for i = 1,mid do
+			vfftN[i],vfftN[mid+i] = vfftN[mid+i],vfftN[i]
+		end
+	else
+		local mid = (#vfftN+1)/2
+		local tmp = vfftN[1]
+		for i = 1,mid do
+			vfftN[i] = vfftN[mid+i]
+			vfftN[mid+i] = vfftN[i+1]
+		end
+		vfftN[mid] = tmp
+	end
+	]]
+	return table.move(vfftN,1,n/2%1==0 and n/2 or (n+1)/2,1,{}),#vfftN
+	--return vfftN,#vfftN
+end
+
+-- Wrapper to use the fourier transform with the luafft module
+function luafft(vect)
+	local luafft = require("signal.luafft")
+	local nps = luafft.next_possible_size(#vect)
+	local n = #vect
+	local vectN = {}
+	for i = 1,nps do
+		vectN[i] = vect[i] or 0
+	end
+	local vfft = luafft.fft(vectN)
+	n = #vectN
+	print("#vfft="..#vfft)
+	print("n="..n)
+	return table.move(vfft,1,n/2%1==0 and n/2 or (n+1)/2,1,{}),#vfft
 end

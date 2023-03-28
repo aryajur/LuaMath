@@ -18,7 +18,7 @@ else
 	_ENV = M
 end
 
-_VERSION = "1.21.06.25"
+_VERSION = "1.23.03.28"
 
 -- Discrete Fourier Series calculator
 -- NOTE: Discrete fourier Series is for a periodic signal. This assumes that there are integer number of periods in the signal array
